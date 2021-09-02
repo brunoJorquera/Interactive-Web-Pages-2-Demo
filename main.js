@@ -31,3 +31,89 @@ function createCharacterCard(char) {
 function clearCharacters() {
   charContainer.innerHTML = ``
 }
+
+function getAllChars(){
+  axios.get('http://localhost:4000/characters')
+    .then((res) => {
+      clearCharacters();
+      const newCharacterArr = res.data
+      for(let char of newCharacterArr){
+        createCharacterCard(char)
+      }
+      // for(let i = 0; i < newCharacterArr.length; i++){
+      //   createCharacterCard(newCharacterArr[i])
+      // }
+    })
+    .catch(err => console.log(err))
+}
+
+getAllBtn.addEventListener('click', getAllChars)
+
+//========================================================================
+
+function getSingleChar(event){
+  const name = event.target.id 
+  axios.get(`http://localhost:4000/character/${name}`)
+    .then(res => {
+      clearCharacters();
+      createCharacterCard(res.data)
+      console.log(res.data)
+    })
+}
+
+for(let btn of charBtns){
+  btn.addEventListener('click', getSingleChar)
+}
+
+//========================================================================
+
+function getAllOldChar(event){
+  event.preventDefault()
+  const age = ageInput.value
+  axios.get(`http://localhost:4000/character?age=${age}`)
+  .then(res => {
+    clearCharacters();
+    console.log(res.data)
+    const newCharacterArr = res.data 
+    for(let char of newCharacterArr){
+      createCharacterCard(char)
+    }
+  })
+}
+
+ageForm.addEventListener('submit', getAllOldChar)
+
+//========================================================================
+
+function createNewChar(event){
+  event.preventDefault();
+
+const newLikes = newLikesText.value.split(', ')
+
+  const body = {
+    firstName: newFirstInput.value,
+    lastName: newLastInput.value,
+    gender: newGenderDropDown.value,
+    age: parseInt(newAgeInput.value),
+    likes: newLikes
+  }
+
+  axios.post('http://localhost:4000/character', body)
+    .then(res => {
+      console.log(res.data)
+      clearCharacters();
+      const newCharacterArr = res.data
+      for(let char of newCharacterArr){
+        createCharacterCard(char)
+      }
+    })
+
+    newFirstInput.value = ''
+    newLastInput.value = ''
+    newGenderDropDown.value = 'female'
+    newAgeInput.value = ''
+    newLikesText.value = ''  
+
+}
+
+createForm.addEventListener('submit', createNewChar)
